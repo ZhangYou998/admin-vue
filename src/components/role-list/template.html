@@ -1,0 +1,165 @@
+<div class="list-wrap">
+  <el-breadcrumb class="list-breadcrumd" separator-class="el-icon-arrow-right">
+    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+    <el-breadcrumb-item>权限管理</el-breadcrumb-item>
+    <el-breadcrumb-item>角色列表</el-breadcrumb-item>
+  </el-breadcrumb>
+  <el-row class="list-action-wrap">
+    <el-col :span="24">
+      <el-button
+        type="success"
+        plain
+        @click="addRoleDialog = true">添加角色</el-button>
+    </el-col>
+  </el-row>
+
+  <!-- 角色列表 -->
+  <el-table
+      :data="roleList"
+      style="width: 100%">
+    <el-table-column type="expand">
+      <template slot-scope="scope">
+        <!-- 一级权限 -->
+        <el-row
+          class="role-level1"
+          v-for="level1 in scope.row.children"
+          :key="level1.id">
+          <el-col :span="4">
+            <el-tag
+              closable
+              @close="handleRmoveRight(scope.row, level1)"
+              type="">
+              {{ level1.authName }}
+            </el-tag>
+            <i class="el-icon-arrow-right"></i>
+          </el-col>
+          <el-col :span="20">
+            <!-- 二级权限 -->
+            <el-row
+              class="role-level2"
+              v-for="level2 in level1.children"
+              :key="level2.id">
+              <el-col :span="4">
+                <el-tag
+                  closable
+                  @close="handleRmoveRight(scope.row, level2)"
+                  type="success">
+                  {{ level2.authName }}
+                </el-tag>
+                <i class="el-icon-arrow-right"></i>
+              </el-col>
+              <!-- 三级权限和二级权限同处一行 -->
+              <el-col :span="20">
+                <span
+                  class="role-level3-tag"
+                  v-for="level3 in level2.children"
+                  :key="level3.id">
+                  <el-tag
+                    closable
+                    @close="handleRmoveRight(scope.row, level3)"
+                    type="warning">
+                    {{ level3.authName }}
+                  </el-tag>
+                </span>
+              </el-col>
+            </el-row>
+          </el-col>
+        </el-row>
+      </template>
+    </el-table-column>
+    <el-table-column
+      type="index"
+      label="#">
+    </el-table-column>
+    <el-table-column
+        label="角色名称"
+        prop="roleName">
+    </el-table-column>
+    <el-table-column
+        label="角色描述"
+        prop="roleDesc">
+    </el-table-column>
+    <el-table-column
+        label="操作">
+        <template slot-scope="scope">
+          <el-button size="mini" type="primary" plain @click="showEditRoleDialog(scope.row)"><i class="el-icon-edit"></i></el-button>
+          <el-button size="mini" type="danger" plain @click="handleRemoveRole(scope.row)"><i class="el-icon-delete"></i></el-button>
+          <el-button size="mini" type="warning" plain @click="showEditRightDialog(scope.row)"><i class="el-icon-share"></i></el-button>
+        </template>
+    </el-table-column>
+  </el-table>
+  <!-- /角色列表 -->
+
+  <!-- 添加角色对话框 -->
+  <el-dialog title="添加角色" :visible.sync="addRoleDialog">
+    <el-form :model="addRoleForm">
+      <el-form-item label="角色名称" label-width="120px">
+        <el-input v-model="addRoleForm.roleName" auto-complete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="描述" label-width="120px">
+        <el-input v-model="addRoleForm.roleDesc" auto-complete="off"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="addRoleDialog = false">取 消</el-button>
+      <el-button type="primary" @click="handleAddRole">确 定</el-button>
+    </div>
+  </el-dialog>
+  <!-- /添加角色对话框 -->
+
+  <!-- 编辑角色对话框 -->
+  <el-dialog title="编辑角色" :visible.sync="editRoleDialog">
+    <el-form :model="editRoleForm">
+      <el-form-item label="角色名称" label-width="120px">
+        <el-input v-model="editRoleForm.roleName" auto-complete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="描述" label-width="120px">
+        <el-input v-model="editRoleForm.roleDesc" auto-complete="off"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="editRoleDialog = false">取 消</el-button>
+      <el-button type="primary" @click="handleEditRole">确 定</el-button>
+    </div>
+  </el-dialog>
+  <!-- /编辑角色对话框 -->
+
+  <!-- 授权对话框 -->
+  <el-dialog title="授权角色" :visible.sync="editRightDialog">
+    <!--
+      权限列表菜单树
+      data 菜单数需要的数据
+      props
+        children 告诉树组件，子节点数组的名是啥
+        label 告诉树组件，节点的文本是哪个字段
+
+      show-checkbox 增加节点复选框
+      default-expand-all 默认展开所有节点
+      node-key="id" 用来指定节点的身份标识，id 是每一个权限的 id
+        这里 id 就会绑定一个节点的属性 id
+      :default-expanded-keys="[2, 3]"
+      :default-checked-keys="[5]" 用来指定默认被选中的节点，值是一个数组，数组中填充 node-key 指定的 id
+
+      接下来只需要找到觉得拥有的所有权限 id 赋值给 default-checked-keys 就真实的被选中了
+
+      default-checked-keys 用来指定默认被选中的节点
+        ['用户管理', '添加角色']
+      根据我们设置的 node-key="authName" 来指定的
+    -->
+    <el-tree
+      :data="treeData"
+      :props="treeProps"
+      ref="rightsTree"
+      show-checkbox
+      default-expand-all
+      node-key="id"
+      :default-checked-keys="treeCheckedKeys">
+    </el-tree>
+    <!-- /权限列表菜单树 -->
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="editRightDialog = false">取 消</el-button>
+      <el-button type="primary" @click="handleEditRights">确 定</el-button>
+    </div>
+  </el-dialog>
+  <!-- /授权对话框 -->
+</div>
