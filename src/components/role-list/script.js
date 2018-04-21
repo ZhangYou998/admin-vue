@@ -261,7 +261,15 @@ export default {
       const {data, meta} = res.data
 
       if (meta.status === 200) {
+        // 删除权限之后，服务器把当前角色拥有的最新权限列表返回
+        // 使用这个数据重新赋值给当前角色的权限列表
+        // 删除成功，更新当前角色的最新列表权限
+        role.children = data
 
+        this.$message({
+          type: 'success',
+          message: '删除权限成功'
+        })
       }
     }
   }
