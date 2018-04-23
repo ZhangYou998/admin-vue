@@ -1,0 +1,68 @@
+<div>
+  <!--
+    一：
+    1. npm i element-tree-grid
+    2. 在 main.js 中注册到全局使用
+        import ElTreeGrid from 'element-tree-grid'
+        Vue.component(ElTreeGrid.name,ElTreeGrid)
+    3. 使用 el-table-tree-column 组件
+
+    二：
+    1. 测试商品分类接口 http://localhost:8888/api/private/v1/categories?pagenum=1&pagesize=5
+    2. 把数据写死到数据中
+    3. 配置 el-table-tree-column 组件使用我们的接口数据
+        prop="cat_name" 节点名称
+        treeKey="cat_id" 节点id
+        parentKey="cat_pid" 节点的父id
+        levelKey="cat_level" 节点的层级
+
+    三：
+    分页加载数据动态展示
+
+    el-table
+      data 表格需要的数据
+      border 带边框
+   -->
+  <el-table :data="tableData" border>
+    <!--
+      el-table-tree-column
+        prop 用来指定使用哪个属性展示节点名
+        label 用来指定
+        child-key 用来告诉组件展开的子节点使用数据中的 children 属性
+        indent-size 层级的缩进大小，单位是像素
+        treeKey 节点 id ，用来指定数据对象的 id 名称供组件使用
+        parentKey 父id属性名
+        levelKey 层级属性名
+     -->
+    <el-table-tree-column
+      fixed :expand-all="!!!1"
+      file-icon="icon icon-file"  folder-icon="icon icon-folder"
+      prop="cat_name"
+      treeKey="cat_id"
+      parentKey="cat_pid"
+      levelKey="cat_level"
+      label="分类名称"
+      child-key="children"
+      width="320"
+      :indent-size="40">
+      <!-- <template slot-scope="scope">
+        <span>prefix =></span>
+        <span @click="text(scope)">{{scope.row.label}} -- {{scope.row.id}}</span>
+        <span>
+            <=suffix</span>
+      </template> -->
+    </el-table-tree-column>
+    <el-table-column label="是否有效" width="180">
+      <!-- 表格列不会输出布尔值，所以我们自己自定义表格列输出布尔值 -->
+      <template slot-scope="scope">{{ scope.row.cat_deleted }}</template>
+    </el-table-column>
+    <el-table-column label="排序" width="180" prop="cat_level">
+    </el-table-column>
+    <el-table-column label="操作" width="180">
+      <template slot-scope="scope">
+        <el-button size="mini" type="success" plain>编辑</el-button>
+        <el-button size="mini" type="danger" plain>删除</el-button>
+      </template>
+    </el-table-column>
+</el-table>
+</div>
