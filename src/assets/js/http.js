@@ -1,11 +1,8 @@
 import axios from 'axios'
+import router from '@/router/index'
 import {getToken} from './auth'
 
-// 建议通过定义插件的配置来扩展 Vue 本身
-// 1. 定义一个插件对象
-const httpPlugin = {}
-
-const http = axios.create({
+export const http = axios.create({
   baseURL: 'http://localhost:8888/api/private/v1/'
 })
 
@@ -36,6 +33,13 @@ http.interceptors.response.use(function (response) {
   const {meta} = response.data
   if (meta.status === 403) {
     window.alert('你没有权限执行该操作！')
+  } else if (meta.status === 401) {
+    // 如果用户长时间未操作导致 token 失效或者有人恶意伪造 token
+    // 则不允许进入系统界面
+    // 在这里通过对 401 统一拦截跳转到登录页
+    router.push({
+      name: 'login'
+    })
   }
 
   // 类似于 next(), 放行通过响应拦截器
@@ -43,6 +47,10 @@ http.interceptors.response.use(function (response) {
 }, function (error) {
   return Promise.reject(error)
 })
+
+// 建议通过定义插件的配置来扩展 Vue 本身
+// 1. 定义一个插件对象
+const httpPlugin = {}
 
 // 2. 为插件对象添加一个成员：install
 //    install 是一个函数
