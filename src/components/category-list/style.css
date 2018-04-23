@@ -1,0 +1,16 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.list-wrap .list-breadcrumd {
+  line-height: 3;
+}
+
+.list-wrap .list-action-wrap {
+  margin-bottom: 10px;
+}
