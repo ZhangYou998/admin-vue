@@ -48,10 +48,8 @@
       <template slot-scope="scope">
         <!-- 我们在这里可以通过 scope.row 拿到当前遍历行对象 -->
         <!--
-
           @change="handleStateChange" 在事件处理函数中可以接收得到 Switch 开关的选中状态
           @change="handleStateChange(scope.row.id)" 直接调用绑定的话就得不到事件参数 Switch 开关的选中状态
-
           所以我们这里：
             @change="(val) => {}" 直接绑定了一个匿名箭头函数，注意不要调用
             (val) => {} 是当 el-switch 组件 change 的事件会自动调用，然后开关的选中状态传递给了 匿名小函数
@@ -61,13 +59,15 @@
          -->
         <el-switch
           v-model="scope.row.mg_state"
-          @change="(val) => { handleStateChange(val, scope.row) }"
+          @change="handleStateChange(scope.row)"
           active-color="#13ce66"
           inactive-color="#ff4949">
         </el-switch>
       </template>
     </el-table-column>
-    <el-table-column label="操作" width="200">
+    <el-table-column
+      label="操作"
+      width="200">
       <template slot-scope="scope">
         <el-button
           size="mini"
@@ -79,7 +79,7 @@
           type="danger"
           icon="el-icon-delete"
           @click="handleDeleteUser(scope.row)"></el-button>
-        <el-button size="mini" type="danger" icon="el-icon-delete"></el-button>
+        <el-button @click="handleShowRole(scope.row)" size="mini" type="warning" icon="el-icon-check"></el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -90,34 +90,36 @@
         一共有多少条记录 :total="10"
     分页组件的页码发生改变的时候会自动调用 handleCurrentChange
     所以我们要做的就是在页码发生改变的时候 handleCurrentChange 方法中加载对应页码的数据
-
     当用户选择切换页码改变的时候，就会触发 handleSizeChange 方法执行
     我们要做的就是在 handleSizeChange 方法中发请求拿到对应的页码数据
         loadUsersByPage(1, 每页大小)
-
     current-page 用来配置指定页码高亮
    -->
   <el-pagination
     @size-change="handleSizeChange"
     @current-change="handleCurrentChange"
     :current-page.sync="currentPage"
-    :page-sizes="[3, 6]"
+    :page-sizes="[5, 8]"
     layout="total, sizes, prev, pager, next, jumper"
     :total="totalSize">
   </el-pagination>
 
   <!-- 添加用户对话框表单 -->
-  <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
+  <el-dialog
+    title="添加用户"
+    :visible.sync="dialogFormVisible">
     <!--
-    表单验证
-    1. 为 el-form 增加 rules 验证规则配置对象
-    2. 为 el-form-item 元素配置 prop 属性，值是验证对象中对应的字段名称
-
-    如果想要使用 JavaScript 来强行验证。那么我们就需要做：
-    1. 为 el-form 增加 ref 属性，给 ref 起一个名字（类似于给元素起 id）
-    2. 在 JavaScript 代码中使用 this.$refs['ref名字'].validate() 验证表单
-   -->
-    <el-form :model="userForm" :rules="addUserFormRules" ref="addUserForm">
+      表单验证
+      1. 为 el-form 增加 rules 验证规则配置对象
+      2. 为 el-form-item 元素配置 prop 属性，值是验证对象中对应的字段名称
+      如果想要使用 JavaScript 来强行验证。那么我们就需要做：
+      1. 为 el-form 增加 ref 属性，给 ref 起一个名字（类似于给元素起 id）
+      2. 在 JavaScript 代码中使用 this.$refs['ref名字'].validate() 验证表单
+     -->
+    <el-form
+      :model="userForm"
+      :rules="addUserFormRules"
+      ref="addUserForm">
       <el-form-item label="用户名" label-width="120px" prop="username">
         <el-input v-model="userForm.username" auto-complete="off"></el-input>
       </el-form-item>
@@ -139,10 +141,15 @@
   <!-- /添加用户对话框表单 -->
 
   <!-- 编辑用户对话框表单 -->
-  <el-dialog title="编辑用户" :visible.sync="dialogEditFormVisible">
+  <el-dialog
+    title="编辑用户"
+    :visible.sync="dialogEditFormVisible">
     <el-form :model="editUserForm">
       <el-form-item label="用户名" label-width="120px" prop="username">
-        <el-input v-model="editUserForm.username" auto-complete="off" :disabled="true"></el-input>
+        <el-input
+          v-model="editUserForm.username"
+          auto-complete="off"
+          :disabled="true"></el-input>
       </el-form-item>
       <el-form-item label="邮箱" label-width="120px" prop="email">
         <el-input type="email" v-model="editUserForm.email" auto-complete="off"></el-input>
@@ -157,4 +164,34 @@
     </div>
   </el-dialog>
   <!-- /编辑用户对话框表单 -->
+
+  <!-- 分配角色对话框 -->
+  <el-dialog title="分配角色" :visible.sync="userRoleDialog">
+    <el-form :model="userRoleForm">
+      <el-form-item label="用户" label-width="120px">
+        <el-input disabled v-model="userRoleForm.username" auto-complete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="角色" label-width="120px">
+        <!--
+          默认选中项取决于 userRoleForm.rid 的值
+          如果 userRoleForm.rid === 某个option的 value ，则该 option 会被自动选中
+          el-option 的 label 是 option 的文本
+          value 就是 option 的 value
+          如果 userRoleForm.rid === 某个 option 的 value（角色id），则该 option 被选中
+         -->
+        <el-select v-model="userRoleForm.rid" placeholder="请选择角色">
+          <el-option
+            :label="item.roleName"
+            v-for="item in roleList"
+            :key="item.id"
+            :value="item.id"></el-option>
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="userRoleDialog = false">取 消</el-button>
+      <el-button type="primary" @click="handleEditUserRole">确 定</el-button>
+    </div>
+  </el-dialog>
+  <!-- /分配角色对话框 -->
 </div>
