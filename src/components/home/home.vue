@@ -24,43 +24,19 @@
           @close="handleClose"
           :unique-opened="true"
           :router="true">
-          <el-submenu index="1">
+          <el-submenu
+            v-for="level1Menu in menuList"
+            :index="level1Menu.path"
+            :key="level1Menu.id">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <!-- 一级菜单的名称 -->
+              <span>{{ level1Menu.authName }}</span>
             </template>
-            <el-menu-item index="/users">用户列表</el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="/roles">角色列表</el-menu-item>
-            <el-menu-item index="/rights">权限列表</el-menu-item>
-          </el-submenu>
-          <el-submenu index="3">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>商品管理</span>
-            </template>
-            <el-menu-item index="3-1">商品列表</el-menu-item>
-            <el-menu-item index="3-2">商品分类</el-menu-item>
-            <el-menu-item index="3-3">商品参数</el-menu-item>
-          </el-submenu>
-          <el-submenu index="4">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>订单管理</span>
-            </template>
-            <el-menu-item index="4-1">订单列表</el-menu-item>
-          </el-submenu>
-          <el-submenu index="5">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>数据统计</span>
-            </template>
-            <el-menu-item index="5-1">数据报表</el-menu-item>
+            <el-menu-item
+              v-for="level2Menu in level1Menu.children"
+              :index="level2Menu.path"
+              :key="level2Menu.id">{{ level2Menu.authName }}</el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
@@ -75,8 +51,14 @@
 import {removeUserInfo} from '@/assets/js/auth'
 
 export default {
+  created () {
+    // 动态加载用户的角色对应的权限菜单数据
+    this.loadMenus()
+  },
   data () {
-    return {}
+    return {
+      menuList: []
+    }
   },
   methods: {
     logout () {
@@ -105,6 +87,14 @@ export default {
     },
     handleClose (key, keyPath) {
       console.log(key, keyPath)
+    },
+    async loadMenus () {
+      // 动态的获取左侧菜单栏数据
+      const res = await this.$http.get('/menus')
+      const {data, meta} = res.data
+      if (meta.status === 200) {
+        this.menuList = data
+      }
     }
   }
 }
