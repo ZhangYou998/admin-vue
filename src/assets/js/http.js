@@ -28,6 +28,22 @@ http.interceptors.request.use(function (config) {
   return Promise.reject(error)
 })
 
+// http 响应拦截器
+// 可以在这里对一些公共的业务进行处理
+// 例如对每个接口进行 403 权限认证判断
+// 如果本地响应的数据是 403，则提示用户：你没有权限执行该操作
+http.interceptors.response.use(function (response) {
+  const {meta} = response.data
+  if (meta.status === 403) {
+    window.alert('你没有权限执行该操作！')
+  }
+
+  // 类似于 next(), 放行通过响应拦截器
+  return response
+}, function (error) {
+  return Promise.reject(error)
+})
+
 // 2. 为插件对象添加一个成员：install
 //    install 是一个函数
 //    该函数接收两个参数：Vue、options
