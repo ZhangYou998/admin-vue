@@ -39,13 +39,20 @@ export default {
       const res = await this.$http.post('/login', this.userForm)
       const data = res.data
       if (data.meta.status === 200) {
-        // 把服务器当前用户信息存储到本地存储
+        // 登录成功，我们把服务器发给我们当前登录的用户信息存储到本地存储
         saveUserInfo(data.data)
 
-        // 导航到 home 组件
-        this.$router.push({
-          name: 'home'
-        })
+        const {redirect} = this.$route.query
+
+        // 如果查询字符串中有 redirect 字段，则直接跳转到这里
+        if (redirect) {
+          this.$router.push(redirect.substr(1))
+        } else {
+          // 导航到 home 组件
+          this.$router.push({
+            name: 'home'
+          })
+        }
 
         // 给出登录成功的是消息
         this.$message({

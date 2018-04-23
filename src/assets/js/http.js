@@ -37,8 +37,16 @@ http.interceptors.response.use(function (response) {
     // 如果用户长时间未操作导致 token 失效或者有人恶意伪造 token
     // 则不允许进入系统界面
     // 在这里通过对 401 统一拦截跳转到登录页
+
+    // 1. 告诉登录组件，从哪里跳过来
+    //    通过 url 地址告诉登录组件
+    // 2. 登录成功之后，看一下 url 中有没有一个叫 redirect 的字段
+    //    如果有就往这里跳，如果没有默认往 home 跳
     router.push({
-      name: 'login'
+      name: 'login',
+      query: {
+        redirect: window.location.hash
+      }
     })
   }
 
