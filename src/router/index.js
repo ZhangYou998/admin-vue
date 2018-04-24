@@ -17,6 +17,9 @@ import RightsList from '@/components/rights-list/rights-list'
 // 分类列表组件
 import CategoryList from '@/components/category-list/category-list'
 
+// 分类参数组件
+import CategoryParams from '@/components/category-params/category-params'
+
 Vue.use(Router)
 
 const router = new Router({
@@ -57,6 +60,11 @@ const router = new Router({
           name: 'category-list',
           path: '/categories',
           component: CategoryList
+        },
+        {
+          name: 'category-params',
+          path: '/params',
+          component: CategoryParams
         }
       ]
     }
