@@ -120,6 +120,33 @@ export default {
         this.addForm.cat_pid = []
         this.loadCategories(this.currentPage)
       }
+    },
+
+    /**
+     * 处理删除分类
+     */
+
+    handleRemoveCategory (category) {
+      this.$confirm('此操作将永久删除该商品，是否继续?','提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$http.delete(`/categories/${category.cat_id}`)
+        const {data, meta} = res.data
+        if (meta.status === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除分类成功'
+          })
+          this.loadCategories(this.currentPage)
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   }
 }
