@@ -1,3 +1,5 @@
+import Category from '@/api/category'
+
 export default {
   created () {
     this.loadCategories(1)
@@ -33,12 +35,10 @@ export default {
     },
     async loadCategories (page) {
       this.loading = true // 发请求之前加载 loading 效果
-      const res = await this.$http.get('/categories', {
-        params: {
-          type: 3,
-          pagenum: page,
-          pagesize: this.pageSize
-        }
+      const res = await Category.findByType({
+        type: 3,
+        pagenum: page,
+        pagesize: this.pageSize
       })
       const {data, meta} = res.data
       if (meta.status === 200) {
@@ -106,11 +106,11 @@ export default {
           break
       }
 
-      const res = await this.$http.post('/categories', {
+      const res = await new Category({
         cat_name: this.addForm.cat_name,
         cat_level: this.addForm.cat_level,
         cat_pid
-      })
+      }).save()
 
       const {data, meta} = res.data
 
@@ -136,7 +136,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async () => {
-        const res = await this.$http.delete(`/categories/${category.cat_id}`)
+        const res = await Category.deleteById(category.cat_id)
         const {data, meta} = res.data
         if (meta.status === 200) {
           this.$message({
@@ -145,7 +145,7 @@ export default {
           })
           this.loadCategories(this.currentPage)
         }
-      }).catch(() => {
+      }).catch((err) => { // 这个 catch 会捕获到 promise 的错误一起内部所有的错误
         this.$message({
           type: 'info',
           message: '已取消删除'
@@ -158,7 +158,7 @@ export default {
      */
 
     async showEditDialog (category) {
-      const res = await this.$http.get(`/categories/${category.cat_id}`)
+      const res = await Category.findById(category.cat_id)
       const {data, meta} = res.data
       if (meta.status === 200) {
         this.editForm = data
@@ -171,7 +171,7 @@ export default {
      */
 
     async handleEditCategory () {
-      const res = await this.$http.put(`/categories/${this.editForm.cat_id}`, this.editForm)
+      const res = await Category.updateById(this.editForm.cat_id, this.editForm, this.editForm)
       const {data, meta} = res.data
       if (meta.status === 200) {
         this.editDialog = false // 关闭编辑分类对话框
