@@ -10,6 +10,10 @@ export default {
       pageSize: 10,
       loading: true,
       addDialog: false,
+      editDialog: false,
+      editForm: {
+        cat_name: ''
+      },
       addForm: {
         car_name: '',
         cat_pid: [],
@@ -147,6 +151,36 @@ export default {
           message: '已取消删除'
         })
       })
+    },
+
+    /**
+     * 显示编辑分类对话框
+     */
+
+    async showEditDialog (category) {
+      const res = await this.$http.get(`/categories/${category.cat_id}`)
+      const {data, meta} = res.data
+      if (meta.status === 200) {
+        this.editForm = data
+        this.editDialog = true
+      }
+    },
+
+    /**
+     * 处理编辑分类
+     */
+
+    async handleEditCategory () {
+      const res = await this.$http.put(`/categories/${this.editForm.cat_id}`, this.editForm)
+      const {data, meta} = res.data
+      if (meta.status === 200) {
+        this.editDialog = false // 关闭编辑分类对话框
+        this.$message({
+          type: 'success',
+          message: '编辑分类成功'
+        })
+        this.loadCategories(this.currentPage) // 重新加载当前分页数据
+      }
     }
   }
 }
