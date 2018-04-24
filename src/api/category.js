@@ -24,6 +24,14 @@ export default class Category {
     return http.post(baseUrl, this)
   }
 
+  static findAll (type = 3) {
+    return http.get(baseUrl, {
+      params: {
+        type: type
+      }
+    })
+  }
+
   // 静态成员，只能被类调用
   static findByType (condition) {
     return http.get(baseUrl, {
@@ -35,7 +43,7 @@ export default class Category {
     })
   }
 
-  static findById (id) {
+  findById (id) {
     return http.get(`${baseUrl}/${id}`)
   }
 
