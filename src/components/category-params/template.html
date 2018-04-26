@@ -19,7 +19,7 @@
     <el-tab-pane label="动态参数">
       <el-row>
         <el-col :span="4">
-          <el-button>添加参数名称</el-button>
+          <el-button @click="showAddManyDialog">添加参数名称</el-button>
         </el-col>
       </el-row>
       <el-table
@@ -29,7 +29,8 @@
           <template slot-scope="scope">
             <el-tag
               closable
-              v-for="item in scope.row.attr_vals.split(',')"
+              v-for="(item, index) in scope.row.attr_vals"
+              @close="handleDeleteTag(scope.row, index)"
               :key="item.attr_id"
               type="success">
               {{ item }}
@@ -37,6 +38,10 @@
             <!--
               我们简单点直接把 inputVisible 添加到当前行对象中
               这样的话每一行的 inputVisible 就都不一样了
+              :autofocus="true" 是静态的，只是一上来获得一次焦点
+              自定义指令操作 DOM
+              ref 也可以操作 DOM
+              ref 可以直接在 JavaScript 中拿到 DOM 元素
             -->
             <el-input
               class="input-new-tag"
@@ -46,7 +51,7 @@
               @keyup.enter.native="handleInputConfirm(scope.row, $event)"
               @blur="handleInputConfirm(scope.row, $event)">
             </el-input>
-            <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)"> New Tag</el-button>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
           </template>
         </el-table-column>
         <el-table-column type="index"></el-table-column>
@@ -65,4 +70,17 @@
     </el-tab-pane>
     <el-tab-pane label="静态属性">静态属性</el-tab-pane>
   </el-tabs>
- </div>
+  <!-- 添加分类动态参数 -->
+  <el-dialog title="添加参数名称" :visible.sync="addManyDialog">
+    <el-form :model="addManyForm">
+      <el-form-item label="参数名称" label-width="120px">
+        <el-input v-model="addManyForm.attr_name" auto-complete="off"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="addManyDialog = false">取 消</el-button>
+      <el-button type="primary" @click="handleAddMany">确 定</el-button>
+    </div>
+  </el-dialog>
+  <!-- 添加分类动态参数 -->
+</div>
