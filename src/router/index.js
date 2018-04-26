@@ -20,6 +20,9 @@ import CategoryList from '@/components/category-list/category-list'
 // 分类参数组件
 import CategoryParams from '@/components/category-params/category-params'
 
+// 商品列表组件
+import Goods from '@/components/goods/goods'
+
 Vue.use(Router)
 
 const router = new Router({
@@ -65,6 +68,11 @@ const router = new Router({
           name: 'category-params',
           path: '/params',
           component: CategoryParams
+        },
+        {
+          name: 'goods',
+          path: '/goods',
+          component: Goods
         }
       ]
     }
